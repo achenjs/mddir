@@ -10,6 +10,7 @@ var depth = 0;
 var exported = false;
 var outputFileName = 'directoryList.md';
 var searchPath = path.resolve(process.argv[2] || '.');
+var folderIgnorePath = process.argv[3];
 var key = searchPath;//.replace(/\//g,'');
 var startFolder = searchPath.split('/')[searchPath.split('/').length - 2];
 var startDepth = searchPath.split('/').length - 1;
@@ -17,12 +18,27 @@ var currentWorkingDirectory = process.cwd();
 
 var folderIgnoreList = [
   '.git',
-  'node_modules'
+  'node_modules',
+  '.DS_Store',
+  'yarn.lock'
 ];
+
+if (folderIgnorePath) {
+  if (folderIgnorePath instanceof String) {
+    folderIgnoreList.push(folderIgnorePath);
+    return;
+  }
+  if (folderIgnorePath instanceof Array) {
+    folderIgnoreList = folderIgnoreList.concat(folderIgnorePath);
+    return;
+  }
+  console.error('The argument must be a string or an array!')
+}
 
 var getFolders = function(path){
   fs.readdir(path, function(err, list){
     if (err) return done(err);
+    console.log(folderIgnoreList);
     list.forEach(function(item){
       if(fs.lstatSync(path + '/' + item).isDirectory() &&
         folderIgnoreList.indexOf(item) === -1){
